@@ -292,7 +292,7 @@ class Updates(PluginTest):
             self.assertTrue((await self.p.check_for_updates())["ok"])
         c.assert_called_once_with(True)
         self.assertEqual((self.p.updates.repo, self.p.updates.folder, self.p.updates.plugin_name),
-                         ("Rayekkk/FSR4Injector", "FSR4Injector", "FSR4 Injector"))
+                         ("Joubcosto/FSR4Injector", "FSR4Injector", "FSR4 Injector"))
         self.assertIn("bin/amdxc64.dll", self.p.updates.required)
         with mock.patch.object(self.p.updates, "download", return_value={"ok": False, "error": "x"}) as d:
             self.assertFalse((await self.p.perform_update("9.9.9"))["ok"])

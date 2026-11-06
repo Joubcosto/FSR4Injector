@@ -30,7 +30,7 @@ import fsr4_games  # noqa: E402
 import fsr4_gpu  # noqa: E402
 import fsr4_install  # noqa: E402
 
-REPOSITORY = "Rayekkk/FSR4Injector"
+REPOSITORY = "Joubcosto/FSR4Injector"
 SHIM_PATH = os.path.join(PLUGIN_DIR, "bin", fsr4_install.SHIM)
 try:
     with open(os.path.join(PLUGIN_DIR, "plugin.json"), encoding="utf-8") as _f:

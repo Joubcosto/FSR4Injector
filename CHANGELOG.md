@@ -2,6 +2,18 @@
 
 All notable changes to FSR4 Injector, newest first.
 
+## [1.1.1] - 2026-11-06
+
+RDNA 2 iGPU support with the INT8 Lite model.
+
+### ✨ Added
+- **GPU:** RDNA 2 iGPUs (Rembrandt Radeon 660M/680M, Raphael/Granite Ridge Radeon Graphics and Mendocino
+  Radeon 610M) are detected and mapped to the Van Gogh RDNA 2 APU profile so AMD's library runs with the
+  `INT8_LITE` model.
+
+### 🔧 Changed
+- **Updates:** Release checks now point to `Joubcosto/FSR4Injector`.
+
 ## [1.1.0] - 2026-10-30
 
 Non-Steam games, a Repair button and an About page. Updating from 1.0.0 keeps your games set up: **Check
