@@ -196,8 +196,16 @@ def _write(dst, data):
     dk_fs.write_atomic(_real(dst), data, no_links=True)
 
 
+# RDNA 2 iGPUs (Rembrandt 146, Raphael 149, Mendocino 151) share Van Gogh's (144) GFX10.3 ISA;
+# amdxcffx64.dll only whitelists family 144 (rev 1..0x7F) for INT8_LITE on RDNA 2.
+RDNA2_IGPU_SPOOF = frozenset({146, 149, 151})
+
+
 def gpu_file_content(gpu):
-    return f"{gpu['device']} {gpu['family']} {gpu['rev']}\n".encode()
+    family, rev = gpu["family"], gpu["rev"]
+    if family in RDNA2_IGPU_SPOOF:
+        family, rev = 144, 1
+    return f"{gpu['device']} {family} {rev}\n".encode()
 
 
 def enable(manifest, game, shim_path, ffx_path, launch_options, gpu=None, launch=True, watermark=False):

@@ -241,6 +241,11 @@ static BOOL read_gpu_file(UINT device, UINT *family, UINT *rev)
     fclose(file);
     if (ok)
     {
+        if (f == 146 || f == 149 || f == 151) /* Rembrandt, Raphael, Mendocino -> Van Gogh for INT8_LITE */
+        {
+            f = 144;
+            r = 1;
+        }
         *family = f;
         *rev = r;
     }

@@ -16,10 +16,12 @@ import struct
 DRM_IOCTL_AMDGPU_INFO = (1 << 30) | (32 << 16) | (ord("d") << 8) | (0x40 + 0x05)
 AMDGPU_INFO_DEV_INFO = 0x16
 
-# Families (AMDGPU_FAMILY_*): 143 NV (RDNA1/2), 144 VGH (Van Gogh), 145 GC 11.0 (RDNA3), 150 GC 11.5 (RDNA 3.5),
-# 152 GC 12 (RDNA4).
+# Families (AMDGPU_FAMILY_*): 143 NV (RDNA1/2), 144 VGH (Van Gogh), 145 GC 11.0 (RDNA3), 146 YC (Rembrandt),
+# 149 GC 10.3.6 (Raphael), 150 GC 11.5 (RDNA 3.5), 151 GC 10.3.7 (Mendocino), 152 GC 12 (RDNA4).
+RDNA2_IGPU_SPOOF = frozenset({146, 149, 151})  # RDNA 2 iGPUs mapped to Van Gogh (144, 1) so AMD's DLL picks INT8_LITE
 MODELS = {"FP8": "FP8", "INT8": "INT8", "INT8_NAVI2": "INT8 (RDNA2)", "INT8_LITE": "INT8 Lite"}
-ARCH = {143: "RDNA 1/2", 144: "RDNA 2 APU (Van Gogh)", 145: "RDNA 3", 148: "RDNA 3 APU", 150: "RDNA 3.5",
+ARCH = {143: "RDNA 1/2", 144: "RDNA 2 APU (Van Gogh)", 145: "RDNA 3", 146: "RDNA 2 APU (Rembrandt)",
+        148: "RDNA 3 APU", 149: "RDNA 2 iGPU", 150: "RDNA 3.5", 151: "RDNA 2 APU (Mendocino)",
         152: "RDNA 4"}
 # (family, revision range) combinations checked on real hardware.
 VERIFIED = [(150, 1, 0x3F)]  # Radeon 880M/890M (Strix Point), Legion Go 2
@@ -33,7 +35,8 @@ def expected_model(family, rev):
         return "INT8"
     if family == 143 and 0x28 <= rev <= 0x4F:
         return "INT8_NAVI2"
-    if (family == 150 and 1 <= rev <= 0x3F) or (family == 144 and 1 <= rev <= 0x7F):
+    if ((family == 150 and 1 <= rev <= 0x3F) or (family == 144 and 1 <= rev <= 0x7F)
+            or (family in RDNA2_IGPU_SPOOF and rev >= 1)):
         return "INT8_LITE"
     return None
 

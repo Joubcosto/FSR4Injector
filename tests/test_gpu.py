@@ -17,6 +17,9 @@ class Model(unittest.TestCase):
             (150, 20): "INT8_LITE",    # Radeon 890M (Strix Point), measured on a Legion Go 2
             (150, 0xC1): "INT8",       # Strix Halo
             (144, 1): "INT8_LITE",     # Van Gogh (Steam Deck, Z2 A)
+            (146, 1): "INT8_LITE",     # Rembrandt (Radeon 660M/680M, Ryzen 6000)
+            (149, 1): "INT8_LITE",     # Raphael (Radeon Graphics RDNA 2, Ryzen 7000/9000)
+            (151, 1): "INT8_LITE",     # Mendocino (Radeon 610M, Ryzen 7020)
             (143, 0x28): "INT8_NAVI2", # RX 6800 (Navi 21)
             (143, 0x46): "INT8_NAVI2", # RX 6500 (Navi 24)
             (143, 0x01): None,         # Navi 10 (RDNA1): no model

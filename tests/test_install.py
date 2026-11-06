@@ -180,6 +180,9 @@ class InstallRollback(unittest.TestCase):
         self.assertEqual(self.files(), ["amdxc64.dll", "amdxcffx64.dll", "fsr4injector.gpu", "game.exe"])
         with open(os.path.join(self.target, I.GPU)) as f:
             self.assertEqual(f.read(), "5390 150 20\n")  # what the shim parses
+        self.assertEqual(I.gpu_file_content({"device": 0x1681, "family": 146, "rev": 1}), b"5761 144 1\n")
+        self.assertEqual(I.gpu_file_content({"device": 0x164E, "family": 149, "rev": 1}), b"5710 144 1\n")
+        self.assertEqual(I.gpu_file_content({"device": 0x1506, "family": 151, "rev": 1}), b"5382 144 1\n")
         self.assertEqual(opts, f"{I.TOKEN} %command% -novid")
         entry = I.Manifest(self.mpath).entries[42]  # persisted
         self.assertEqual(entry["mode"], I.MODE_NATIVE)
