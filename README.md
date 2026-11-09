@@ -2,18 +2,43 @@
 
 <img src="FSR4Injector.png" alt="FSR4 Injector" width="760">
 
-[![Release](https://img.shields.io/github/v/release/Rayekkk/FSR4Injector?style=for-the-badge&label=release&color=C2410C&labelColor=141417)](https://github.com/Rayekkk/FSR4Injector/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/Rayekkk/FSR4Injector/total?style=for-the-badge&label=downloads&color=15803D&labelColor=141417)](https://github.com/Rayekkk/FSR4Injector/releases)
-[![GPU](https://img.shields.io/badge/GPU-RDNA_3.5_(Radeon_890M)-6E40C9?style=for-the-badge&labelColor=141417)](#requirements)
+[![Release](https://img.shields.io/github/v/release/Joubcosto/FSR4Injector?style=for-the-badge&label=release&color=C2410C&labelColor=141417)](https://github.com/Joubcosto/FSR4Injector/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/Joubcosto/FSR4Injector/total?style=for-the-badge&label=downloads&color=15803D&labelColor=141417)](https://github.com/Joubcosto/FSR4Injector/releases)
+[![GPU](https://img.shields.io/badge/GPU-RDNA_3.5_&_RDNA_2_iGPUs-6E40C9?style=for-the-badge&labelColor=141417)](#requirements)
 [![Requires](https://img.shields.io/badge/requires-Decky_Loader-0969DA?style=for-the-badge&labelColor=141417)](https://decky.xyz)
 [![License](https://img.shields.io/badge/license-BSD--3_+_LGPL--2.1-424A53?style=for-the-badge&labelColor=141417)](#license)
 
-**AMD's official FSR 4.1 upscaler on your RDNA 3.5 handheld, in SteamOS Gaming Mode.**
+**AMD's official FSR 4.1 upscaler on your RDNA 3.5 & RDNA 2 handhelds and APUs, in SteamOS Gaming Mode.**
 Turn it on per game from the Quick Access Menu: AMD's own, unmodified FSR 4 library with the Lite model made for handhelds, in games that already use FSR 3.1. No OptiScaler, nothing patched on disk.
 
-[Features](#features) · [Requirements](#requirements) · [Installation](#installation) · [Quick start](#quick-start) · [Troubleshooting](#troubleshooting) · [How it works](#how-it-works) · [AI disclaimer](#ai-disclaimer)
+[About this fork](#about-this-fork--modifications) · [Features](#features) · [Requirements](#requirements) · [Installation](#installation) · [Quick start](#quick-start) · [Troubleshooting](#troubleshooting) · [How it works](#how-it-works) · [AI disclaimer](#ai-disclaimer)
 
 </div>
+
+---
+
+## About this Fork & Modifications
+
+> [!IMPORTANT]
+> **This project is a fork of [Rayekkk/FSR4Injector](https://github.com/Rayekkk/FSR4Injector).**  
+> While the original project focuses primarily on RDNA 3.5 APUs (Radeon 880M/890M), this fork expands compatibility to include **AMD RDNA 2 integrated GPUs (iGPUs)** that share the same underlying architecture.
+
+### Exactly what was modified in this fork:
+
+1. **RDNA 2 iGPU Detection (`fsr4_gpu.py`):**
+   * Added hardware definitions for RDNA 2 integrated graphics families:
+     * **Rembrandt** (family `146`): Radeon 660M / 680M (Ryzen 6000 mobile series)
+     * **Raphael / Granite Ridge** (family `149`): Radeon Graphics (Ryzen 7000 / 9000 desktop series)
+     * **Mendocino** (family `151`): Radeon 610M (Ryzen 7020 series)
+   * Configured model expectations so these iGPUs are assigned AMD's official **`INT8_LITE`** model.
+
+2. **Van Gogh Profile Mapping & Spoofing (`fsr4_install.py` & `shim/src/fsr4i.c`):**
+   * **Why it is needed:** All RDNA 2 iGPUs share the same GFX10.3 ISA as Van Gogh (Steam Deck, family `144`). However, AMD's official `amdxcffx64.dll` strictly whitelists family `144` for the `INT8_LITE` model on RDNA 2 and refuses families `146`, `149`, and `151`, causing FSR 4 to fall back to FSR 3.
+   * **The fix:** When the plugin detects one of these RDNA 2 iGPUs (`RDNA2_IGPU_SPOOF`), `fsr4_install.py` and the `amdxc64.dll` shim dynamically map the GPU private driver data to family `144` and revision `1`. This allows AMD's unmodified library to run the `INT8_LITE` model on these chips seamlessly.
+
+3. **Repository & Updater References:**
+   * Updated `plugin.json`, `package.json`, `main.py`, and the Decky UI panel to point to this repository ([Joubcosto/FSR4Injector](https://github.com/Joubcosto/FSR4Injector)) for releases, downloads, and update checks.
+   * Added corresponding unit tests in `tests/test_gpu.py` and `tests/test_install.py`.
 
 ---
 
@@ -22,7 +47,9 @@ Turn it on per game from the Quick Access Menu: AMD's own, unmodified FSR 4 libr
 AMD brought FSR 4.1 to RDNA 3.5 APUs such as the Radeon 890M (Ryzen Z2 Extreme) on Windows in
 October 2026. Under Proton the same library loads but quietly falls back to FSR 3, because it
 identifies the GPU through Windows driver data that Wine does not have. FSR4 Injector supplies
-that one missing answer and manages everything around it.
+that one missing answer and manages everything around it. This fork extends compatibility to
+RDNA 2 iGPUs (Rembrandt Radeon 660M/680M, Raphael/Granite Ridge Radeon Graphics, Mendocino
+Radeon 610M) by mapping them to the Van Gogh APU profile to enable AMD's INT8 Lite model.
 
 | Feature | What you get |
 |---|---|
@@ -44,7 +71,7 @@ model 15.1 ms. One run per variant.
 
 | Requirement | Details |
 |---|---|
-| GPU | An AMD GPU that AMD's FSR 4.1.2 has a model for. **Verified:** Radeon 880M/890M (Strix Point: Ryzen Z2 Extreme, Ryzen AI 9 300) with the Lite model. **Beta, not tested yet:** Steam Deck and Ryzen Z2 A (Van Gogh, Lite), RX 6000 (RDNA2 model), RX 7000 and Strix Halo (INT8), RX 9000 (FP8) |
+| GPU | An AMD GPU that AMD's FSR 4.1.2 has a model for. **Verified:** Radeon 880M/890M (Strix Point: Ryzen Z2 Extreme, Ryzen AI 9 300) with the Lite model. **RDNA 2 iGPUs (added in this fork, mapped to Van Gogh INT8 Lite):** Rembrandt (Radeon 660M/680M, Ryzen 6000), Raphael / Granite Ridge (Radeon Graphics, Ryzen 7000/9000), Mendocino (Radeon 610M, Ryzen 7020). **Beta, not tested yet:** Steam Deck and Ryzen Z2 A (Van Gogh, Lite), RX 6000 (RDNA2 model), RX 7000 and Strix Halo (INT8), RX 9000 (FP8) |
 | System | SteamOS in Gaming Mode with [Decky Loader](https://decky.xyz); Proton 11 or Proton Experimental |
 | Games | DirectX 12 games that ship `amd_fidelityfx_dx12.dll`, `amd_fidelityfx_upscaler_dx12.dll` or `amd_fidelityfx_loader_dx12.dll` (FSR 3.1 or newer) |
 | Network | Once, to download AMD's library from `drivers.amd.com`; and when you check for plugin updates (GitHub) |
@@ -74,7 +101,7 @@ another drive, such as an SD card, gets its own copy.
 ## Installation
 
 1. Install [Decky Loader](https://decky.xyz) if you do not already have it.
-2. Download `FSR4Injector-<version>.zip` from [Releases](https://github.com/Rayekkk/FSR4Injector/releases).
+2. Download `FSR4Injector-<version>.zip` from [Releases](https://github.com/Joubcosto/FSR4Injector/releases).
 3. In Gaming Mode, open **Quick Access Menu → Decky → Settings**, turn on **Developer mode** under
    **General**, then open **Developer**.
 4. Choose **Install Plugin from ZIP**, select the archive, then open **FSR4 Injector** in Decky.
@@ -177,10 +204,12 @@ front of its launch options (without it Wine loads its own builtin `amdxc64` and
 AMD's library picks its model by asking the Windows kernel driver for the GPU family. Wine has
 no answer, so every model is refused and FSR 3 stays. The plugin reads the GPU's real family and
 revision from the Linux amdgpu driver (the values RADV reports, e.g. family 150, revision 20 on
-the 890M) into `fsr4injector.gpu`, and the shim answers that one question with them. The library
-then chooses its model by its own rules, as on Windows: Lite on RDNA 3.5 and Van Gogh APUs, its
-RDNA2 model on RX 6000, INT8 on RX 7000 and Strix Halo. Nothing on disk is patched; AMD's
-signature stays intact.
+the 890M) into `fsr4injector.gpu`, and the shim answers that one question with them. For RDNA 2
+iGPUs (Rembrandt family 146, Raphael family 149, Mendocino family 151) that share Van Gogh's
+GFX10.3 ISA, the plugin and shim map them to the Van Gogh APU profile (family 144, revision 1) so
+AMD's library activates the INT8 Lite model. The library then chooses its model by its own rules,
+as on Windows: Lite on RDNA 3.5, Van Gogh and supported RDNA 2 APUs, its RDNA2 model on RX 6000,
+INT8 on RX 7000 and Strix Halo. Nothing on disk is patched; AMD's signature stays intact.
 
 AMD's library is not part of the plugin. It ships only inside AMD's 1.7 GB Adrenalin installer,
 compressed in a few large LZMA2 blocks. The plugin downloads only the stretch (about 43 MB) from a
@@ -230,6 +259,7 @@ Decky and AMD's server are mocked; game sessions still need testing on the handh
 
 ## Credits
 
+- **Rayek** and [FSR4Injector](https://github.com/Rayekkk/FSR4Injector) - the original project this fork is based on
 - **Etaash Mathamsetty** and [GE-Proton](https://github.com/GloriousEggroll/proton-ge-custom) - the `amdxc64` implementation the shim is based on
 - [vkd3d-proton](https://github.com/HansKristian-Work/vkd3d-proton) - the D3D12 extensions the shim queries
 - [OptiScaler](https://github.com/optiscaler/OptiScaler) - documenting how FSR 4 picks its model
